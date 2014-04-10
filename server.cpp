@@ -18,11 +18,6 @@ Server::Server(int port)
     m_portNum = port;
 }
 
-Server::~Server()
-{
-
-}
-
 void Server::start()
 {
     setup();
@@ -96,18 +91,71 @@ bool Server::checkPortNum()
 
 void Server::processRequest(int sock)
 {
-    int n;
     char buffer[BUFFER_SIZE];
     bzero(buffer, BUFFER_SIZE);
 
-    n = read(sock, buffer, BUFFER_SIZE - 1);
+    int n = read(sock, buffer, BUFFER_SIZE - 1);
     if (n < 0) fprintf (stderr, "ERROR reading from socket %d", sock);
 
-    printf("Here is the message: %s\n",buffer);
-}
+    // Print message to the console
+    fprintf(stdout, "\n***********************************\n");
+    fprintf(stdout, "        Here is the Message        \n");
+    fprintf(stdout, "***********************************\n");
+    fprintf(stdout, "%s\n", buffer);
 
-void sendData(int sock)
-{
-    int n = write(sock, "I got your message", 18);
+
+    // Get requested file's name
+    char *cFileName = strtok(buffer, " ");
+    cFileName = strtok(NULL, " ");
+    std::string fileName = "";
+    if (cFileName == NULL || (cFileName[0] == '/' && cFileName[1] == '\0'))
+        fileName = "index.html";
+    else
+        fileName = cFileName;
+
+    fileName = WEB_DIRECTORY + fileName;
+    std::ifstream ifs;
+    ifs.open(fileName.c_str(), std::ifstream::in);
+    if (!ifs.is_open()) {
+        std::string msg = "HTTP/1.1 " + ERR_404 + "\r\nContent-Length: 36\r\nContent-Type: text/plain\r\n\r\nSorry, we couldn't find that file.\r\n";
+        n = write(sock, msg.c_str(), msg.length());
+        if (n < 0) fprintf(stderr, "ERROR writing to socket %d", sock);
+        return;
+    }
+
+    std::string responseFile = "";
+    char c = ifs.get();
+    while (ifs.good()) {
+        responseFile += c;
+        c = ifs.get();
+    }
+    ifs.close();
+
+    std::string header = "HTTP/1.1 200\r\n";
+    if (fileName[0] == '/' && fileName.rfind('.') != std::string::npos) {
+        //fileName = fileName.substr(1);
+        std::string fileExt = fileName.substr(fileName.rfind('.'));
+        toLowerCase(fileExt);
+
+        // Check file extension and crap like that
+
+        if (fileExt == ".txt")
+            header += "Content-Type: text/plain\r\n";
+        else if (fileExt == ".html" || fileExt == ".htm")
+            header += "Content-Type: text/html; charset=utf-8\r\n";
+        else if (fileExt == ".gif")
+            header += "Content-Type: image/gif\r\n";
+        else if (fileExt == ".jpeg" || fileExt == ".jpg")
+            header += "Content-Type: image/jpeg\r\n";
+        else if (fileExt == ".png")
+            header += "Content-Type: image/png\r\n";
+    }
+    bzero(buffer, BUFFER_SIZE);
+    sprintf(buffer, "%d", responseFile.length());
+    header += "Content-Length: " + std::string(buffer) + "\r\n\r\n";
+
+    n = write(sock, header.c_str(), header.length());
+    if (n < 0) fprintf(stderr, "ERROR writing to socket %d", sock);
+    n = write(sock, responseFile.c_str(), responseFile.length());
     if (n < 0) fprintf(stderr, "ERROR writing to socket %d", sock);
 }

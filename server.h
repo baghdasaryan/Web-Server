@@ -25,6 +25,8 @@
 #include <string>
 #include <sys/wait.h>   /* for the waitpid() system call */
 #include <signal.h>     /* signal name macros, and the kill() prototype */
+#include <iostream>
+#include <fstream>
 
 #include "config.h"
 #include "utils.h"
@@ -39,10 +41,7 @@ class Server
 {
     public:
         Server(int port);
-        ~Server();
-
         void start();
-
 
     private:
         int m_portNum;

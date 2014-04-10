@@ -21,6 +21,7 @@
 
 // Function Definitions
 static void error(std::string err);
+static void toLowerCase(std::string &str);
 
 
 // Function Implementations
@@ -29,6 +30,13 @@ static void error(std::string err)
 {
     perror(err.c_str());
     exit(1);
+}
+
+static void toLowerCase(std::string &str)
+{
+    for (size_t i = 0; i < str.length(); i++)
+        str[i] = std::tolower(str[i]);
+
 }
 
 
