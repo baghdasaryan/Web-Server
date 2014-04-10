@@ -20,7 +20,7 @@ void displayHelp();
 int main(int argc, char *argv[])
 {
     int portNum = -1;
-    string dir = "";
+    std::string dir = "";
     for (int c; (c = getopt (argc, argv, "p:d:h")) != -1; ) {
         switch (c) {
             case 'p':
@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 dir = optarg;
+                // TODO: Check directory
                 break;
             case 'h':
                 displayHelp();
@@ -40,13 +41,11 @@ int main(int argc, char *argv[])
                     fprintf(stderr, "Unknown option `-%c'.\n", optopt);
                 else
                     fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
-                fprintf("\nPlease see help (./server -h).\n");
+                fprintf(stderr, "\nPlease see help (./server -h).\n");
             default:
                 break;
+        }
     }
-
-    fprintf("\n P = %d", portNum);
-    fprintf("\n D = %s", dir);
 
     Server server(portNum == -1? PORT_NUMBER : portNum);
     server.start();
@@ -54,14 +53,14 @@ int main(int argc, char *argv[])
 
 void displayHelp()
 {
-    std::cout << "C++ Web-Server" << std::endl;
+    fprintf(stdout, "C++ Web-Server\n");
 
-    std::cout << "Usage:" << std::endl;
-    std::cout << "    ./server --- Start Web-Server on the default port (2048)" << std::endl;
-    std::cout << "    ./server -p PORT_NUMBER --- Start server on port PORT_NUMBER" << std::endl;
-    std::cout << "    ./server -d DIRECTORY --- Change file directory to DIRECTORY" << std::endl;
-    std::cout << "    ./server -h --- Show this message" << std::endl;
+    fprintf(stdout, "Usage:\n");
+    fprintf(stdout, "    ./server --- Start Web-Server on the default port (2048)\n");
+    fprintf(stdout, "    ./server -p PORT_NUMBER --- Start server on port PORT_NUMBER\n");
+    fprintf(stdout, "    ./server -d DIRECTORY --- Change file directory to DIRECTORY\n");
+    fprintf(stdout, "    ./server -h --- Show this message\n");
 
-    std::cout << "\nAuthor:" << std::endl;
-    std::cout << "    Georgi Baghdasaryan" << std::endl;
+    fprintf(stdout, "\nAuthor:\n");
+    fprintf(stdout, "    Georgi Baghdasaryan\n");
 }
