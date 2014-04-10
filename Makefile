@@ -1,17 +1,21 @@
-CC=g++
-CFLAGS=-c -Wall
-LDFLAGS=
-SOURCES=$(wildcard *.cpp)
-OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=server
+CC = g++
+DEBUG = -g
+CFLAGS = -Wall #-Wextra -Werror $(DEBUG)
+LDFLAGS = -Wall $(DEBUG)
+SOURCES = $(wildcard *.cpp)
+HEADERS = $(wildcard *.h)
+INCLUDES =
+OBJECTS = $(SOURCES:.cpp=.o)
+EXECUTABLE = server
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+#server: $(OBJECTS)
+$(EXECUTABLE): $(SOURCES) $(HEADERS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(SOURCES)
 
-.cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+#.cpp.o:
+#	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(EXECUTABLE) *.o
+	rm -f server *.o *~

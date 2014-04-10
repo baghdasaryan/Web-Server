@@ -16,6 +16,7 @@
 
 #define PORT_NUMBER 2048
 #define NUM_CONNECTIONS 5
+#define BUFFER_SIZE 32768 // 2^15
 
 
 #endif  // __CONFIG_H__
