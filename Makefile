@@ -1,6 +1,6 @@
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall #-Wextra -Werror $(DEBUG)
+CFLAGS = -Wall -Wextra #-Werror $(DEBUG)
 LDFLAGS = -Wall $(DEBUG)
 SOURCES = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
@@ -18,4 +18,7 @@ $(EXECUTABLE): $(SOURCES) $(HEADERS)
 #	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f server *.o *~
+	rm -f server *.o *~ *.tar *.tmp
+
+tar: clean
+	tar cf project1_603875284.tar *
