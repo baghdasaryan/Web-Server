@@ -31,17 +31,20 @@ void Server::start()
             error("ERROR on accept");
 
         pid = fork(); //create a new process
-        if (pid > 0) {
+        if (pid < 0) {
+            fprintf(stderr, "Fork failed, parent taking care of the connection.");
+            requestHandler(newsockfd);
             close(newsockfd);
             continue;
         }
 
-        close(sockfd);
-        requestHandler(newsockfd);
-        if (pid == 0)
+        if (pid == 0) { // fork() returns a value of 0 to the child process
+            close(sockfd);
+            requestHandler(newsockfd);
             exit(0);
-        else if (pid < 0)
-            fprintf(stderr, "Fork failed, parent took care of the connection.");
+        } else {
+            close(newsockfd);  // parent doesn't need this
+        }
     }
 }
 
@@ -104,16 +107,14 @@ void Server::requestHandler(int sock)
     fprintf(stdout, "***********************************\n");
     fprintf(stdout, "%s\n", buffer);
 
-
     // Get requested file's name
     char *cFileName = strtok(buffer, " ");
     cFileName = strtok(NULL, " ");
     std::string fileName = "";
-    fprintf(stdout, "%s", cFileName);
-    if (cFileName == NULL || (cFileName[0] == '/' && cFileName[1] == '\0'))
-        fileName = "index.html";
-    else
-        fileName = cFileName;
+    fileName += cFileName;
+    if (cFileName == NULL || cFileName[strlen(cFileName) - 1] == '/')
+        fileName += "index.html";
+
 
     fileName = m_webdir + fileName;
     std::ifstream ifs;
@@ -140,9 +141,7 @@ void Server::requestHandler(int sock)
         toLowerCase(fileExt);
 
         // Check file extension and stuff like that
-        if (fileExt == ".txt")
-            header += "Content-Type: text/plain\r\n";
-        else if (fileExt == ".html" || fileExt == ".htm")
+        if (fileExt == ".html" || fileExt == ".htm")
             header += "Content-Type: text/html; charset=utf-8\r\n";
         else if (fileExt == ".gif")
             header += "Content-Type: image/gif\r\n";
@@ -150,6 +149,8 @@ void Server::requestHandler(int sock)
             header += "Content-Type: image/jpeg\r\n";
         else if (fileExt == ".png")
             header += "Content-Type: image/png\r\n";
+        else 
+            header += "Content-Type: text/plain\r\n";
     }
     bzero(buffer, BUFFER_SIZE);
     sprintf(buffer, "%d", (int) (responseFile.length()));
