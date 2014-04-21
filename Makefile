@@ -1,6 +1,6 @@
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall -Wextra #-Werror $(DEBUG)
+CFLAGS = -Wall -Wno-unused-function #-Wextra -Werror $(DEBUG)
 LDFLAGS = -Wall $(DEBUG)
 SOURCES = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
