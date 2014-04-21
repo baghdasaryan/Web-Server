@@ -40,11 +40,12 @@ static void sigchld_handler(int s)
 class Server
 {
     public:
-        Server(int port);
+        Server(int port, std::string webdir);
         void start();
 
     private:
         int m_portNum;
+        std::string m_webdir;
 
         // Socket stuff
         int sockfd, newsockfd, portno;
@@ -55,7 +56,7 @@ class Server
 
         void setup();
         bool checkPortNum();
-        void processRequest(int sock);
+        void requestHandler(int sock);
 };
 
 

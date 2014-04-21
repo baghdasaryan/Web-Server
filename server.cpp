@@ -13,15 +13,16 @@
 #include "server.h"
 
 
-Server::Server(int port)
+Server::Server(int port, std::string webdir)
 {
     m_portNum = port;
+    m_webdir = webdir;
+
+    setup();
 }
 
 void Server::start()
 {
-    setup();
-
     clilen = sizeof(cli_addr);
     while (1) {
         newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
@@ -36,7 +37,7 @@ void Server::start()
         }
 
         close(sockfd);
-        processRequest(newsockfd);
+        requestHandler(newsockfd);
         if (pid == 0)
             exit(0);
         else if (pid < 0)
@@ -81,15 +82,15 @@ bool Server::checkPortNum()
     // Verify that the socket port number is same as the given one
     sockaddr_in testSock;
     socklen_t testLen = sizeof(testSock);
-    int curPortNum = getsockname(sockfd, ( struct sockaddr * )&testSock, &testLen);
+    int curPortNum = getsockname(sockfd, (struct sockaddr *) &testSock, &testLen);
     if (curPortNum != 0)
-        error("ERROR obtaining checking port number");
+        error("ERROR checking port number");
     else if (ntohs(testSock.sin_port) != m_portNum)
         return false;
     return true;
 }
 
-void Server::processRequest(int sock)
+void Server::requestHandler(int sock)
 {
     char buffer[BUFFER_SIZE];
     bzero(buffer, BUFFER_SIZE);
@@ -108,12 +109,13 @@ void Server::processRequest(int sock)
     char *cFileName = strtok(buffer, " ");
     cFileName = strtok(NULL, " ");
     std::string fileName = "";
+    fprintf(stdout, "%s", cFileName);
     if (cFileName == NULL || (cFileName[0] == '/' && cFileName[1] == '\0'))
         fileName = "index.html";
     else
         fileName = cFileName;
 
-    fileName = WEB_DIRECTORY + fileName;
+    fileName = m_webdir + fileName;
     std::ifstream ifs;
     ifs.open(fileName.c_str(), std::ifstream::in);
     if (!ifs.is_open()) {
@@ -137,8 +139,7 @@ void Server::processRequest(int sock)
         std::string fileExt = fileName.substr(fileName.rfind('.'));
         toLowerCase(fileExt);
 
-        // Check file extension and crap like that
-
+        // Check file extension and stuff like that
         if (fileExt == ".txt")
             header += "Content-Type: text/plain\r\n";
         else if (fileExt == ".html" || fileExt == ".htm")
@@ -151,7 +152,7 @@ void Server::processRequest(int sock)
             header += "Content-Type: image/png\r\n";
     }
     bzero(buffer, BUFFER_SIZE);
-    sprintf(buffer, "%d", responseFile.length());
+    sprintf(buffer, "%d", (int) (responseFile.length()));
     header += "Content-Length: " + std::string(buffer) + "\r\n\r\n";
 
     n = write(sock, header.c_str(), header.length());
