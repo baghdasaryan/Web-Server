@@ -3,9 +3,9 @@ C++ Web-Server
 
 Contributors
 ------------
-| Name                | Email                             |
-| ----                | -----                             |
-| Georgi Baghdasaryan | baghdasaryan@ucla.edu             |
+| Name                | Email                 |
+| ----                | -----                 |
+| Georgi Baghdasaryan | baghdasaryan@ucla.edu |
 
 
 Project Description
